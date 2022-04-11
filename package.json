@@ -1,15 +1,20 @@
 {
-  "name": "aws-ffmpeg-layer",
+  "name": "aws-clamda-layer",
   "description": "",
   "version": "0.1.0",
-  "dependencies": {},
   "devDependencies": {
     "aws-sdk": "^2.964.0",
-    "jest": "^27.0.6"
+    "jest": "^27.0.6",
+    "serverless-plugin-include-dependencies": "^5.0.0",
+    "serverless-prune-plugin": "^2.0.1"
   },
   "scripts": {
     "build": "./build.sh",
     "deploy": "sls deploy",
     "test": "jest handler.test.js"
+  },
+  "dependencies": {
+    "got": "^0.3.0",
+    "object-assign": "^4.1.1"
   }
 }

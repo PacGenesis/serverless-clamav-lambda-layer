@@ -1,0 +1,36 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyDownloadInfected1",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObjectTagging"
+      ],
+      "Resource": "arn:aws:s3:::__BUCKET__/*",
+      "Condition": {
+        "StringEquals": {
+          "s3:ExistingObjectTag/av-status": "dirty"
+        }
+      }
+    },
+    {
+      "Effect": "Deny",
+      "NotPrincipal": {
+        "AWS": [
+          "arn:aws:iam::__ACCOUNT__:role/__SERVICE__-__DEPLOYENV__-__REGION__-lambdaRole",
+          "arn:aws:iam::__ACCOUNT__:root"
+        ]
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::__BUCKET__/*",
+      "Condition": {
+        "StringNotEquals": {
+          "s3:ExistingObjectTag/av-status": "clean"
+        }
+      }
+    }
+  ]
+}

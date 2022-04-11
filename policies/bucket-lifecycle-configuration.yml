@@ -1,0 +1,20 @@
+{
+    "Rules": [
+        {
+            "Expiration": {
+                "Days": 1
+            },
+            "ID": "purge infected",
+            "Filter": {
+                "Tag": {
+                    "Key": "av-status",
+                    "Value": "dirty"
+                }
+            },
+            "Status": "Enabled",
+            "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 1
+            }
+        }
+    ]
+}

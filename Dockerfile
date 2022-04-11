@@ -54,21 +54,28 @@ RUN mkdir -p lib
 RUN mkdir -p var/lib/clamav
 RUN chmod -R 777 var/lib/clamav
 
-COPY ./freshclam.conf .
-
-RUN cp usr/bin/clamscan usr/bin/freshclam bin/.
-RUN cp usr/lib64/* lib/.
-RUN cp freshclam.conf bin/freshclam.conf
-
 RUN yum install shadow-utils.x86_64 -y
 
 RUN groupadd clamav
 RUN useradd -g clamav -s /bin/false -c "Clam Antivirus" clamav
 RUN useradd -g clamav -s /bin/false -c "Clam Antivirus" clamupdate
+COPY ./freshclam.conf bin/freshclam.conf
 
-RUN LD_LIBRARY_PATH=./lib ./bin/freshclam --config-file=bin/freshclam.conf
+RUN cp usr/bin/clamscan usr/bin/freshclam /usr/bin/curl bin/.
+RUN mkdir -p /opt/var/lib/clamav ; chown clamupdate:clamav /opt/var/lib/clamav 
 
-RUN zip -r9 clamav_lambda_layer.zip bin
-RUN zip -r9 clamav_lambda_layer.zip lib
-RUN zip -r9 clamav_lambda_layer.zip var
-RUN zip -r9 clamav_lambda_layer.zip etc
+# symlinks to hard links
+RUN cd /lib64 ; ls -la | grep -v libc\.so | egrep ' lib.* -> lib' | sed -e 's/.* \(lib.*\) -> \(lib.*\)/rm \1 ; ln \2 \1/' | bash
+# then copy the curl dependancies
+RUN cd /lib64 ; for i in $(ldd /usr/bin/curl | awk '{ print $1 }'); do [ -f $i ]&&cat $i > /home/build/lib/$i ; done; true
+
+RUN cp -a usr/lib64/* lib/
+RUN cd lib ; ls -la | egrep ' lib.* -> lib' | sed -e 's/.* \(lib.*\) -> \(lib.*\)/rm \1 ; mv \2 \1/' ; cd ..
+RUN LD_LIBRARY_PATH=./lib  ./bin/freshclam --config-file=bin/freshclam.conf
+RUN chmod -R a+rwX /opt/var/lib/clamav
+RUN cp -av /opt/var/lib/clamav/* var/lib/clamav
+
+RUN zip -r0 clamav_lambda_layer.zip bin
+RUN zip -r0 clamav_lambda_layer.zip lib
+RUN zip -r0 clamav_lambda_layer.zip var
+RUN zip -r0 clamav_lambda_layer.zip etc

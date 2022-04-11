@@ -1,14 +1,19 @@
 service: clambda-av
 
+params:
+  default:
+    scanbucket: "pg-clamav-test"
+    
 provider:
   name: aws
   runtime: nodejs14.x
+  versionFunctions: false
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:GetObject
         - s3:PutObjectTagging
-      Resource: "arn:aws:s3:::clambda-av-files/*"
+      Resource: arn:aws:s3:::${param:scanbucket}/*
 
 functions:
   virusScan:
@@ -16,7 +21,7 @@ functions:
     memorySize: 2048
     events:
       - s3: 
-          bucket: clambda-av-files
+          bucket: ${param:scanbucket}
           event: s3:ObjectCreated:*
     layers:
       - {Ref: ClamavLambdaLayer}
@@ -30,3 +35,12 @@ package:
 layers:
   clamav:
     path: layer
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-plugin-include-dependencies
+
+custom:
+  prune:
+    automatic: true
+    number: 1
