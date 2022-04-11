@@ -7,3 +7,4 @@ layer/var
 coverage/
 .DS_Store
 results.txt
+temp.yml
